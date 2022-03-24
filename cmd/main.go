@@ -7,14 +7,14 @@ import (
 
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/db"
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/pb"
-	"github.com/hellokvn/go-grpc-auth-svc/pkg/service"
+	"github.com/hellokvn/go-grpc-auth-svc/pkg/services"
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	port := ":50052"
-	h := db.Init()
+	port := ":50051"
+	h := db.Init("postgres://kevin@localhost:5432/auth_svc")
 
 	jwt := utils.JwtWrapper{
 		SecretKey:       "SECRET_KEY",
@@ -28,9 +28,9 @@ func main() {
 		log.Fatalln("Failed to listing:", err)
 	}
 
-	fmt.Println("Run Product Svc on", port)
+	fmt.Println("Auth Svc on", port)
 
-	s := service.Server{
+	s := services.Server{
 		H:   h,
 		Jwt: jwt,
 	}
