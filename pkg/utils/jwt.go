@@ -16,14 +16,12 @@ type JwtWrapper struct {
 	ExpirationHours int64
 }
 
-// JwtClaim adds email as a claim to the token
 type JwtClaims struct {
-	Id    int32
+	Id    int64
 	Email string
 	jwt.StandardClaims
 }
 
-// GenerateToken generates a jwt token
 func (j *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err error) {
 	claims := &JwtClaims{
 		Id:    auth.Id,
@@ -45,7 +43,6 @@ func (j *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err er
 	return signedToken, nil
 }
 
-//ValidateToken validates the jwt token
 func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaims, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,

@@ -2,8 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/db"
@@ -18,8 +16,6 @@ type Server struct {
 }
 
 func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	fmt.Println("Register", req)
-
 	var auth models.Auth
 
 	if result := s.H.DB.Where(&models.Auth{Email: req.Email}).First(&auth); result.Error == nil {
@@ -40,8 +36,6 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 }
 
 func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	log.Println("Login", req)
-
 	var auth models.Auth
 
 	if result := s.H.DB.Where(&models.Auth{Email: req.Email}).First(&auth); result.Error != nil {
@@ -69,8 +63,6 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 }
 
 func (s *Server) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
-	fmt.Println("Validate", req)
-
 	claims, err := s.Jwt.ValidateToken(req.Token)
 
 	if err != nil {
@@ -82,7 +74,7 @@ func (s *Server) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.Val
 
 	var auth models.Auth
 
-	if result := s.H.DB.Where(&models.Auth{Email: claims.Email}).First(&auth); result.Error == nil {
+	if result := s.H.DB.Where(&models.Auth{Email: claims.Email}).First(&auth); result.Error != nil {
 		return &pb.ValidateResponse{
 			Status: http.StatusNotFound,
 			Error:  "User not found",
