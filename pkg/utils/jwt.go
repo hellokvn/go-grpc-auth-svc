@@ -8,22 +8,20 @@ import (
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/models"
 )
 
-const secretKey string = "secretkey"
-
 type JwtWrapper struct {
 	SecretKey       string
 	Issuer          string
 	ExpirationHours int64
 }
 
-type JwtClaims struct {
+type jwtClaims struct {
+	jwt.StandardClaims
 	Id    int64
 	Email string
-	jwt.StandardClaims
 }
 
 func (j *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err error) {
-	claims := &JwtClaims{
+	claims := &jwtClaims{
 		Id:    auth.Id,
 		Email: auth.Email,
 		StandardClaims: jwt.StandardClaims{
@@ -43,10 +41,10 @@ func (j *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err er
 	return signedToken, nil
 }
 
-func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaims, err error) {
+func (j *JwtWrapper) ValidateToken(signedToken string) (claims *jwtClaims, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
-		&JwtClaims{},
+		&jwtClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(j.SecretKey), nil
 		},
@@ -56,7 +54,7 @@ func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaims, err e
 		return
 	}
 
-	claims, ok := token.Claims.(*JwtClaims)
+	claims, ok := token.Claims.(*jwtClaims)
 
 	if !ok {
 		return nil, errors.New("Couldn't parse claims")
