@@ -20,19 +20,19 @@ type jwtClaims struct {
 	Email string
 }
 
-func (j *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err error) {
+func (w *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err error) {
 	claims := &jwtClaims{
 		Id:    auth.Id,
 		Email: auth.Email,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
-			Issuer:    j.Issuer,
+			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(w.ExpirationHours)).Unix(),
+			Issuer:    w.Issuer,
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	signedToken, err = token.SignedString([]byte(j.SecretKey))
+	signedToken, err = token.SignedString([]byte(w.SecretKey))
 
 	if err != nil {
 		return "", err
@@ -41,12 +41,12 @@ func (j *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err er
 	return signedToken, nil
 }
 
-func (j *JwtWrapper) ValidateToken(signedToken string) (claims *jwtClaims, err error) {
+func (w *JwtWrapper) ValidateToken(signedToken string) (claims *jwtClaims, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&jwtClaims{},
 		func(token *jwt.Token) (interface{}, error) {
-			return []byte(j.SecretKey), nil
+			return []byte(w.SecretKey), nil
 		},
 	)
 
