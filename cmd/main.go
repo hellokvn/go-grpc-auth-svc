@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/hellokvn/go-grpc-auth-svc/pkg/config"
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/db"
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/pb"
 	"github.com/hellokvn/go-grpc-auth-svc/pkg/services"
@@ -13,22 +14,27 @@ import (
 )
 
 func main() {
-	port := ":50051"
-	h := db.Init("postgres://kevin@localhost:5432/auth_svc")
+	c, err := config.LoadConfig()
+
+	if err != nil {
+		log.Fatalln("Failed at config", err)
+	}
+
+	h := db.Init(c.DBUrl)
 
 	jwt := utils.JwtWrapper{
-		SecretKey:       "SECRET_KEY",
+		SecretKey:       c.JWTSecretKey,
 		Issuer:          "go-grpc-auth-svc",
 		ExpirationHours: 24 * 365,
 	}
 
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", c.Port)
 
 	if err != nil {
 		log.Fatalln("Failed to listing:", err)
 	}
 
-	fmt.Println("Auth Svc on", port)
+	fmt.Println("Auth Svc on", c.Port)
 
 	s := services.Server{
 		H:   h,
