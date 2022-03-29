@@ -19,7 +19,7 @@ func Init(url string) Handler {
 		log.Fatalln(err)
 	}
 
-	db.AutoMigrate(&models.Auth{})
+	db.AutoMigrate(&models.User{})
 
 	return Handler{db}
 }

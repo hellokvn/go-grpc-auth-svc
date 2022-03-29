@@ -20,10 +20,10 @@ type jwtClaims struct {
 	Email string
 }
 
-func (w *JwtWrapper) GenerateToken(auth models.Auth) (signedToken string, err error) {
+func (w *JwtWrapper) GenerateToken(user models.User) (signedToken string, err error) {
 	claims := &jwtClaims{
-		Id:    auth.Id,
-		Email: auth.Email,
+		Id:    user.Id,
+		Email: user.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(w.ExpirationHours)).Unix(),
 			Issuer:    w.Issuer,
