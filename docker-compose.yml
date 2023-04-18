@@ -1,0 +1,52 @@
+version: '3'
+services:
+  auth-service:
+    container_name: auth-api
+    build: .
+    depends_on:
+      - auth-postgres
+    ports: 
+      - 50051:50051
+    restart: on-failure
+    volumes:
+      - ./:/usr/src/app-auth/
+    networks:
+      - fullstack
+
+  auth-postgres:
+    image: postgres:latest
+    container_name: auth_db_postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}  
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DATABASE_HOST=${DB_HOST} 
+    ports:
+      - '5431:5432'
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+    networks:
+      - fullstack
+    
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    depends_on:
+      - auth-postgres
+    ports:
+      - "5050:80"
+    networks:
+      - fullstack
+    restart: unless-stopped
+
+networks:
+  fullstack:
+    external: true
+
+volumes:
+  api:
+  database_postgres:
+
