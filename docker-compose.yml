@@ -28,25 +28,24 @@ services:
     networks:
       - fullstack
     
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin_container
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    depends_on:
-      - auth-postgres
-    ports:
-      - "5050:80"
-    networks:
-      - fullstack
-    restart: unless-stopped
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin_container
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #   depends_on:
+  #     - auth-postgres
+  #   ports:
+  #     - "5050:80"
+  #   networks:
+  #     - fullstack
+  #   restart: unless-stopped
 
 networks:
   fullstack:
     external: true
 
 volumes:
-  api:
   database_postgres:
 

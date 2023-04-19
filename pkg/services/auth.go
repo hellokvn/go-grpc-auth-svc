@@ -11,6 +11,7 @@ import (
 )
 
 type Server struct {
+	pb.UnimplementedAuthServiceServer
 	H   db.Handler
 	Jwt utils.JwtWrapper
 }
