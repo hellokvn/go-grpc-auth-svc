@@ -5,12 +5,14 @@ import (
 	"log"
 	"net"
 
-	"github.com/hellokvn/go-grpc-auth-svc/pkg/config"
-	"github.com/hellokvn/go-grpc-auth-svc/pkg/db"
-	"github.com/hellokvn/go-grpc-auth-svc/pkg/pb"
-	"github.com/hellokvn/go-grpc-auth-svc/pkg/services"
-	"github.com/hellokvn/go-grpc-auth-svc/pkg/utils"
+	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/auth"
+	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/config"
+	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/database"
+	pb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
+	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/server"
+	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/utils"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 		log.Fatalln("Failed at config", err)
 	}
 
-	h := db.Init(c.DBUrl)
+	h := database.Init(c.DBUrl)
 
 	jwt := utils.JwtWrapper{
 		SecretKey:       c.JWTSecretKey,
@@ -28,7 +30,7 @@ func main() {
 		ExpirationHours: 24 * 365,
 	}
 
-	lis, err := net.Listen("tcp", c.Port)
+	listen, err := net.Listen("tcp", c.Port)
 
 	if err != nil {
 		log.Fatalln("Failed to listing:", err)
@@ -36,16 +38,14 @@ func main() {
 
 	fmt.Println("Auth Svc on", c.Port)
 
-	s := services.Server{
-		H:   h,
-		Jwt: jwt,
-	}
-
 	grpcServer := grpc.NewServer()
+	authService := auth.NewAuthService(auth.NewUserRepository(h), jwt) // Puedes pasar una conexión de base de datos real aquí.
+	pb.RegisterAuthServiceServer(grpcServer, server.NewAuthServer(authService))
 
-	pb.RegisterAuthServiceServer(grpcServer, &s)
+	// Register reflection service on gRPC server.
+	reflection.Register(grpcServer)
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalln("Failed to serve:", err)
+	if err := grpcServer.Serve(listen); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
 	}
 }
