@@ -14,7 +14,13 @@ type AuthServer struct {
 	auth.AuthService
 }
 
-func NewAuthServer(service auth.AuthService) AuthServer
+func NewAuthServer(service auth.AuthService) authpb.AuthServiceServer {
+	return &AuthServer{
+		authpb.UnimplementedAuthServiceServer{},
+		service,
+	}
+}
+
 func (s *AuthServer) Register(ctx context.Context, req *authpb.RegisterRequest) (*authpb.RegisterResponse, error) {
 	fmt.Println("RPC auth-service/Register")
 	result, err := s.AuthService.Register(ctx, req)
@@ -23,7 +29,7 @@ func (s *AuthServer) Register(ctx context.Context, req *authpb.RegisterRequest) 
 		return &authpb.RegisterResponse{
 			Status: http.StatusConflict,
 			Error:  "E-Mail already exists",
-		}, nil
+		}, err
 	}
 
 	return result, nil
@@ -33,10 +39,11 @@ func (s *AuthServer) Login(ctx context.Context, req *authpb.LoginRequest) (*auth
 	fmt.Println("RPC auth-service/Login")
 	result, err := s.AuthService.Login(ctx, req)
 	if err != nil {
+		fmt.Println(err.Error())
 		return &authpb.LoginResponse{
 			Status: http.StatusNotFound,
 			Error:  "User not found",
-		}, nil
+		}, err
 	}
 
 	return result, nil
@@ -45,11 +52,16 @@ func (s *AuthServer) Login(ctx context.Context, req *authpb.LoginRequest) (*auth
 func (s *AuthServer) Validate(ctx context.Context, req *authpb.ValidateRequest) (*authpb.ValidateResponse, error) {
 	result, err := s.AuthService.Validate(ctx, req)
 	if err != nil {
+		fmt.Println(err.Error())
 		return &authpb.ValidateResponse{
 			Status: http.StatusBadRequest,
 			Error:  err.Error(),
-		}, nil
+		}, err
 	}
 
 	return result, nil
+}
+
+func (s *AuthServer) HealthCheck(ctx context.Context, req *authpb.Empty) (*authpb.Empty, error) {
+	return &authpb.Empty{}, nil
 }

@@ -67,7 +67,7 @@ func (s *authService) Login(ctx context.Context, req *authpb.LoginRequest) (*aut
 		}, nil
 	}
 
-	token, err := s.jwt.GenerateToken(user)
+	token, err := s.jwt.GenerateToken(*user)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +97,6 @@ func (s *authService) Validate(ctx context.Context, req *authpb.ValidateRequest)
 
 	return &authpb.ValidateResponse{
 		Status: http.StatusOK,
-		UserId: user.ID,
+		UserId: user.Id,
 	}, nil
 }
