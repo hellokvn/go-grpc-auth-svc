@@ -8,7 +8,7 @@ import (
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/auth"
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/config"
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/database"
-	pb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
+	authpb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/server"
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/utils"
 	"google.golang.org/grpc"
@@ -40,7 +40,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	authService := auth.NewAuthService(auth.NewUserRepository(h), jwt) // Puedes pasar una conexión de base de datos real aquí.
-	pb.RegisterAuthServiceServer(grpcServer, server.NewAuthServer(authService))
+	authpb.RegisterAuthServiceServer(grpcServer, server.NewAuthServer(authService))
 
 	// Register reflection service on gRPC server.
 	reflection.Register(grpcServer)

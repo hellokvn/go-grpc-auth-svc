@@ -6,21 +6,21 @@ import (
 	"net/http"
 
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/auth"
-	pb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
+	authpb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
 )
 
 type AuthServer struct {
-	pb.UnimplementedAuthServiceServer
+	authpb.UnimplementedAuthServiceServer
 	auth.AuthService
 }
 
 func NewAuthServer(service auth.AuthService) AuthServer
-func (s *AuthServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (s *AuthServer) Register(ctx context.Context, req *authpb.RegisterRequest) (*authpb.RegisterResponse, error) {
 	fmt.Println("RPC auth-service/Register")
 	result, err := s.AuthService.Register(ctx, req)
 
 	if err != nil {
-		return &pb.RegisterResponse{
+		return &authpb.RegisterResponse{
 			Status: http.StatusConflict,
 			Error:  "E-Mail already exists",
 		}, nil
@@ -29,11 +29,11 @@ func (s *AuthServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb
 	return result, nil
 }
 
-func (s *AuthServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (s *AuthServer) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	fmt.Println("RPC auth-service/Login")
 	result, err := s.AuthService.Login(ctx, req)
 	if err != nil {
-		return &pb.LoginResponse{
+		return &authpb.LoginResponse{
 			Status: http.StatusNotFound,
 			Error:  "User not found",
 		}, nil
@@ -42,10 +42,10 @@ func (s *AuthServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Login
 	return result, nil
 }
 
-func (s *AuthServer) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+func (s *AuthServer) Validate(ctx context.Context, req *authpb.ValidateRequest) (*authpb.ValidateResponse, error) {
 	result, err := s.AuthService.Validate(ctx, req)
 	if err != nil {
-		return &pb.ValidateResponse{
+		return &authpb.ValidateResponse{
 			Status: http.StatusBadRequest,
 			Error:  err.Error(),
 		}, nil

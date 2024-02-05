@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/models"
-	pb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
+	authpb "github.com/ErwinSalas/go-grpc-auth-svc/pkg/proto"
 	"github.com/ErwinSalas/go-grpc-auth-svc/pkg/utils"
 )
 
 type AuthService interface {
-	Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error)
-	Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error)
-	Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error)
+	Register(ctx context.Context, req *authpb.RegisterRequest) (*authpb.RegisterResponse, error)
+	Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error)
+	Validate(ctx context.Context, req *authpb.ValidateRequest) (*authpb.ValidateResponse, error)
 }
 
 type authService struct {
@@ -27,10 +27,10 @@ func NewAuthService(repo UserRepository, jwt utils.JwtWrapper) AuthService {
 	}
 }
 
-func (s *authService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (s *authService) Register(ctx context.Context, req *authpb.RegisterRequest) (*authpb.RegisterResponse, error) {
 	user, err := s.repo.GetUserByEmail(req.Email)
 	if err == nil {
-		return &pb.RegisterResponse{
+		return &authpb.RegisterResponse{
 			Status: http.StatusConflict,
 			Error:  "E-Mail already exists",
 		}, nil
@@ -45,15 +45,15 @@ func (s *authService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		return nil, err
 	}
 
-	return &pb.RegisterResponse{
+	return &authpb.RegisterResponse{
 		Status: http.StatusCreated,
 	}, nil
 }
 
-func (s *authService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (s *authService) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	user, err := s.repo.GetUserByEmail(req.Email)
 	if err != nil {
-		return &pb.LoginResponse{
+		return &authpb.LoginResponse{
 			Status: http.StatusNotFound,
 			Error:  "User not found",
 		}, nil
@@ -61,7 +61,7 @@ func (s *authService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 
 	match := utils.CheckPasswordHash(req.Password, user.Password)
 	if !match {
-		return &pb.LoginResponse{
+		return &authpb.LoginResponse{
 			Status: http.StatusUnauthorized,
 			Error:  "Invalid password",
 		}, nil
@@ -72,16 +72,16 @@ func (s *authService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 		return nil, err
 	}
 
-	return &pb.LoginResponse{
+	return &authpb.LoginResponse{
 		Status: http.StatusOK,
 		Token:  token,
 	}, nil
 }
 
-func (s *authService) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+func (s *authService) Validate(ctx context.Context, req *authpb.ValidateRequest) (*authpb.ValidateResponse, error) {
 	claims, err := s.jwt.ValidateToken(req.Token)
 	if err != nil {
-		return &pb.ValidateResponse{
+		return &authpb.ValidateResponse{
 			Status: http.StatusBadRequest,
 			Error:  err.Error(),
 		}, nil
@@ -89,13 +89,13 @@ func (s *authService) Validate(ctx context.Context, req *pb.ValidateRequest) (*p
 
 	user, err := s.repo.GetUserByEmail(claims.Email)
 	if err != nil {
-		return &pb.ValidateResponse{
+		return &authpb.ValidateResponse{
 			Status: http.StatusNotFound,
 			Error:  "User not found",
 		}, nil
 	}
 
-	return &pb.ValidateResponse{
+	return &authpb.ValidateResponse{
 		Status: http.StatusOK,
 		UserId: user.ID,
 	}, nil

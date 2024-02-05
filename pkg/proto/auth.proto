@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package auth;
+option go_package = "github.com/ErwinSalas/go-grpc-auth-svc/proto;authpb";
 
-option go_package = "./pkg/proto";
+package proto;
 
 service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse) {}
